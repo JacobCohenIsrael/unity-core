@@ -1,4 +1,4 @@
-using JCI.Core.Inspector;
+using JCI.Attributes;
 using RSG;
 using UnityEngine;
 
