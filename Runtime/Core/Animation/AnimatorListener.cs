@@ -8,9 +8,9 @@ namespace JCI.Core.Animations
 {
     public class AnimatorListener : MonoBehaviour
     {
-        public IPromise WaitForStateChange(Animator animator)
+        public IPromise WaitForStateChange(Animator animator, int layer)
         {
-            var currentState = animator.GetCurrentAnimatorStateInfo(0);
+            var currentState = animator.GetCurrentAnimatorStateInfo(layer);
             StopCoroutine(nameof(_WaitForStateChangeRoutine));
             var p = new Promise();
             StartCoroutine(_WaitForStateChangeRoutine());
@@ -19,7 +19,7 @@ namespace JCI.Core.Animations
             {
                 while (true)
                 {
-                    var state = animator.GetCurrentAnimatorStateInfo(0);
+                    var state = animator.GetCurrentAnimatorStateInfo(layer);
                     if (state.fullPathHash != currentState.fullPathHash)
                     {
                         p.Resolve();
@@ -32,12 +32,12 @@ namespace JCI.Core.Animations
             return p;
         }
 
-        public IPromise WaitForState(Animator animator, string stateName, float timeToWait = 0f)
+        public IPromise WaitForState(Animator animator, string stateName, int layer, float timeToWait = 0f)
         {
             StopCoroutine(nameof(_WaitForStateRoutine));
-            var p = new Promise();   
+            var p = new Promise();
             StartCoroutine(_WaitForStateRoutine());
-            
+
             IEnumerator _WaitForStateRoutine()
             {
                 if (timeToWait == 0)
@@ -46,13 +46,13 @@ namespace JCI.Core.Animations
                     yield return new WaitForSeconds(timeToWait); // we wait an extra frame here so the animation state have time to change the state in case we transition from current state
                 while (true)
                 {
-                    if (animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
+                    if (animator.GetCurrentAnimatorStateInfo(layer).IsName(stateName))
                     {
                         p.Resolve();
                         yield break;
                     }
                     yield return null;
-                }        
+                }
             }
 
             return p;
