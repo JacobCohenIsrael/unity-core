@@ -32,7 +32,17 @@ namespace JCI.Editor
                 return;
             }
 
-            var controller = animator.runtimeAnimatorController as AnimatorController;
+            AnimatorController controller = null;
+            if (animator.runtimeAnimatorController is AnimatorOverrideController)
+            {
+                var overrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
+                controller = overrideController.runtimeAnimatorController as AnimatorController;
+            }
+            else
+            {
+                controller = animator.runtimeAnimatorController as AnimatorController;
+            }
+
             if (controller == null)
             {
                 EditorGUI.PropertyField(position, property, label);
@@ -43,7 +53,9 @@ namespace JCI.Editor
             var parameterNames = GetTriggerNames(controller);
             var selectedIndex = Mathf.Max(0, System.Array.IndexOf(parameterNames, property.stringValue));
 
-            selectedIndex = EditorGUI.Popup(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight), label.text, selectedIndex, parameterNames);
+            selectedIndex =
+                EditorGUI.Popup(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight),
+                    label.text, selectedIndex, parameterNames);
 
             property.stringValue = parameterNames[selectedIndex];
 
@@ -57,8 +69,8 @@ namespace JCI.Editor
             {
                 parameterNames[i] = controller.parameters[i].name;
             }
+
             return parameterNames;
         }
     }
 }
-

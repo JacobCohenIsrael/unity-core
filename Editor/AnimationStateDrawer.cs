@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using JCI.Attributes;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -8,8 +9,6 @@ namespace JCI.Editor
     [CustomPropertyDrawer(typeof(AnimatorStateAttribute))]
     public class AnimatorStateDrawer : PropertyDrawer
     {
-        private string[] stateNames;
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -32,7 +31,7 @@ namespace JCI.Editor
                 return;
             }
 
-            var controller = animator.runtimeAnimatorController as AnimatorController;
+            var controller = GetAnimatorController(animator);
             if (controller == null)
             {
                 EditorGUI.PropertyField(position, property, label);
@@ -43,22 +42,44 @@ namespace JCI.Editor
             var stateNames = GetStateNames(controller);
             var selectedIndex = Mathf.Max(0, System.Array.IndexOf(stateNames, property.stringValue));
 
-            selectedIndex = EditorGUI.Popup(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight), label.text, selectedIndex, stateNames);
+            selectedIndex =
+                EditorGUI.Popup(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight),
+                    label.text, selectedIndex, stateNames);
 
             property.stringValue = stateNames[selectedIndex];
 
             EditorGUI.EndProperty();
         }
 
+        private AnimatorController GetAnimatorController(Animator animator)
+        {
+            if (animator.runtimeAnimatorController is AnimatorOverrideController overrideController)
+            {
+                return overrideController.runtimeAnimatorController as AnimatorController;
+            }
+            else
+            {
+                return animator.runtimeAnimatorController as AnimatorController;
+            }
+        }
+
         private string[] GetStateNames(AnimatorController controller)
         {
-            var stateNames = new string[controller.layers[0].stateMachine.states.Length];
-            for (int i = 0; i < controller.layers[0].stateMachine.states.Length; i++)
+            var stateNames = new List<string>();
+
+            if (controller != null)
             {
-                stateNames[i] = controller.layers[0].stateMachine.states[i].state.name;
+                foreach (var layer in controller.layers)
+                {
+                    var stateMachine = layer.stateMachine;
+                    foreach (var state in stateMachine.states)
+                    {
+                        stateNames.Add(state.state.name);
+                    }
+                }
             }
-            return stateNames;
+
+            return stateNames.ToArray();
         }
     }
 }
-
