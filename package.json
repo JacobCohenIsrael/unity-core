@@ -1,14 +1,12 @@
 {
   "name": "com.thegamefather.core",
   "displayName": "The Gamefather Core",
-  "version": "1.1.1",
-  "description": "Core game ",
+  "version": "1.1.2",
+  "description": "Core game",
   "unity": "2021.2",
   "author": {
     "name": "Jacob Cohen",
     "email": "JacobCohenIsrael@gmail.com"
-  },
-  "dependencies": {
   },
   "keywords": [
     "package",
